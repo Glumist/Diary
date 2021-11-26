@@ -124,10 +124,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diary.ico" />
+    <None Include="Resources\IconFilter.png" />
+    <None Include="Resources\IconCopy.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName)$(TargetExt)" "D:\BackUp\Google Drive\Diary\$(TargetName)$(TargetExt)"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName)$(TargetExt)" "F:\BackUp\Google Drive\Diary\$(TargetName)$(TargetExt)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

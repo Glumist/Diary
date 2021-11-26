@@ -229,37 +229,33 @@ namespace Diary
 
         private void RefreshRecordsTable()
         {
+            List<Record> filteredRecords = new List<Record>(_recordsCollection.Records);
+            if (!string.IsNullOrWhiteSpace(tstbFilter.Text))
+                filteredRecords.RemoveAll(fr => !fr.Caption.ToLower().Contains(tstbFilter.Text.ToLower()));
+
             switch (tscbGroup.SelectedIndex)
             {
                 case 0:
                     string selectedTag = GetSelectedTag();
                     if (selectedTag != null)
-                        ShowRecordsByTag(selectedTag);
+                    {
+                        if (selectedTag == TAGS_ALL)
+                            dgvRecords.DataSource = filteredRecords;
+                        else
+                            dgvRecords.DataSource = filteredRecords.FindAll(r => r.Tags.Contains(selectedTag));
+                    }
                     break;
                 case 1:
                     Entity selectedEntity = GetSelectedEntity();
                     if (selectedEntity != null)
-                        ShowRecordsByEntity(selectedEntity);
+                        dgvRecords.DataSource = filteredRecords.FindAll(g => g.Entities.Contains(selectedEntity));
                     break;
                 default:
-                    dgvRecords.DataSource = new List<Record>(_recordsCollection.Records);
+                    dgvRecords.DataSource = filteredRecords;
                     break;
             }
 
             dgvRecords.ClearSelection();
-        }
-
-        private void ShowRecordsByTag(string tag)
-        {
-            if (tag == TAGS_ALL)
-                dgvRecords.DataSource = new List<Record>(_recordsCollection.Records);
-            else
-                dgvRecords.DataSource = _recordsCollection.Records.FindAll(r => r.Tags.Contains(tag));
-        }
-
-        private void ShowRecordsByEntity(Entity entity)
-        {
-            dgvRecords.DataSource = new List<Record>(_recordsCollection.Records.FindAll(g => g.Entities.Contains(entity)));
         }
 
         private void tsmiRecordAdd_Click(object sender, EventArgs e)
@@ -306,6 +302,32 @@ namespace Diary
             RefreshGroupTable();
         }
 
+        private void tsmiRecordCopy_Click(object sender, EventArgs e)
+        {
+            Record selectedRecord = GetSelectedRecord();
+            if (selectedRecord == null)
+                return;
+
+            Record newRecord = new Record()
+            {
+                Caption = selectedRecord.Caption,
+                Date = DateTime.Now,
+                Entities = new List<Entity>(selectedRecord.Entities),
+                Tags = new List<string>(selectedRecord.Tags),
+                Text = selectedRecord.Text
+            };
+
+
+            if (new FormRecord(newRecord).ShowDialog() != DialogResult.OK)
+                return;
+
+            _recordsCollection.Add(newRecord);
+            Save();
+            RefreshGroupTable();
+
+            SelectRecord(newRecord);
+        }
+
         private Record GetSelectedRecord()
         {
             if (dgvRecords.SelectedRows.Count == 0 || dgvRecords.SelectedRows[0].Index == -1)
@@ -332,6 +354,11 @@ namespace Diary
                     break;
                 }
             }
+        }
+
+        private void tstbFilter_TextChanged(object sender, EventArgs e)
+        {
+            RefreshRecordsTable();
         }
 
         #endregion

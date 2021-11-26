@@ -21,6 +21,14 @@ namespace Diary
             set { _text = value; }
         }
 
+        public string TextStr
+        {
+            get
+            {
+                return string.Join(Environment.NewLine, Text);
+            }
+        }
+
         private string _caption = "";
         public string Caption
         {
