@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Diary.Properties;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Drawing;
 using System.Xml.Serialization;
 
-namespace Diary
+namespace Diary.Classes
 {
     public class Record
     {
@@ -34,6 +35,31 @@ namespace Diary
         {
             get { return _caption; }
             set { _caption = value; }
+        }
+
+        private string _emotion;
+        public string Emotion
+        {
+            get { return _emotion; }
+            set { _emotion = value;
+ }
+        }
+
+        public Image EmotionPic
+        {
+            get
+            {
+                switch (Emotion)
+                {
+                    case "0": return Resources.IconArrowsCenter;
+                    case "+-": return Resources.IconArrows;
+                    case "+": return Resources.IconArrowUp;
+                    case "++": return Resources.IconArrowUpDouble;
+                    case "-": return Resources.IconArrowDown;
+                    case "--": return Resources.IconArrowDownDouble;
+                    default: return new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                }
+            }
         }
 
         private List<Entity> _entities;
@@ -68,10 +94,36 @@ namespace Diary
             set { _tags = value; }
         }
 
+        private List<Tag> _tagList;
+        [XmlIgnore]
+        public List<Tag> TagList
+        {
+            get { return _tagList; }
+            set { _tagList = value; }
+        }
+
+        private List<int> _tagsIds;
+        public List<int> TagsIds
+        {
+            get
+            {
+                if (TagList != null && TagList.Count > 0)
+                {
+                    List<int> ids = new List<int>();
+                    foreach (Tag tag in TagList)
+                        ids.Add(tag.Id);
+                    return ids;
+                }
+                return _tagsIds;
+            }
+            set { _tagsIds = value; }
+        }
+
         public Record()
         {
             Date = DateTime.Now;
             Tags = new List<string>();
+            TagList = new List<Tag>();
             Entities = new List<Entity>();
             Text = new List<string>();
         }
@@ -101,6 +153,13 @@ namespace Diary
             set { _entities = value; }
         }
 
+        private List<Tag> _tags;
+        public List<Tag> Tags
+        {
+            get { return _tags; }
+            set { _tags = value; }
+        }
+
         private List<Record> _records;
         public List<Record> Records
         {
@@ -111,6 +170,7 @@ namespace Diary
         private RecordsCollection()
         {
             Entities = new List<Entity>();
+            Tags = new List<Tag>();
             Records = new List<Record>();
         }
 
@@ -140,6 +200,8 @@ namespace Diary
             {
                 RecordsCollection toCheck = fileName.LoadAndDeserialize<RecordsCollection>();
                 if (toCheck.Records.Count != Records.Count)
+                    return false;
+                if (toCheck.Tags.Count != Tags.Count)
                     return false;
                 if (toCheck.Entities.Count != Entities.Count)
                     return false;
@@ -172,14 +234,52 @@ namespace Diary
                 entity.Text = "";
             }*/
 
+            SetTagsParents(result.Tags);
             SetRecordsEntities(result.Records, result.Entities);
+            SetRecordsTags(result.Records, result.Tags);
+
+            foreach (Record record in result.Records)
+            {
+                foreach (string tagStr in record.Tags)
+                {
+                    Tag tag = result.Tags.Find(t => t.Name == tagStr);
+                    if (tag == null)
+                    {
+                        tag = new Tag() { Name = tagStr };
+                        result.Add(tag);
+                    }
+                    if (!record.TagList.Contains(tag))
+                        record.TagList.Add(tag);
+                }
+                record.Tags.Clear();
+            }
 
             result.Records.Sort(Record.CompareByDate);
             result.Entities.Sort(Entity.CompareByName);
+            result.Tags.Sort(Tag.CompareByParent);
 
             return result;
         }
 
+        private static void SetTagsParents(List<Tag> tags)
+        {
+            foreach (Tag tag in tags)
+                if (tag.ParentId != -1)
+                    tag.Parent = tags.Find(i => i.Id == tag.ParentId);
+        }
+
+        private static void SetRecordsTags(List<Record> records, List<Tag> tags)
+        {
+            foreach (Record record in records)
+                foreach (int tagId in record.TagsIds)
+                    foreach (Tag tag in tags)
+                        if (tag.Id == tagId)
+                        {
+                            record.TagList.Add(tag);
+                            break;
+                        }
+        }
+        
         private static void SetRecordsEntities(List<Record> records, List<Entity> entities)
         {
             foreach (Record record in records)
@@ -205,22 +305,45 @@ namespace Diary
             Entities.Sort(Entity.CompareByName);
         }
 
+        public void Add(Tag tag)
+        {
+            int lastId = -1;
+            foreach (Tag i in Tags)
+                if (i.Id > lastId)
+                    lastId = i.Id;
+
+            tag.Id = lastId + 1;
+
+            Tags.Add(tag);
+            Tags.Sort(Tag.CompareByParent);
+        }
+
         public void Add(Record record)
         {
             Records.Add(record);
             Records.Sort(Record.CompareByDate);
         }
 
-        public List<string> GetAllTags()
+        public static List<Tag> GetSubTags(Tag tag)
+        {
+            List<Tag> result = new List<Tag>();
+            result.Add(tag);
+            foreach (Tag subItem in RecordsCollection.GetInstance().Tags.FindAll(t => t.Parent == tag))
+                result.AddRange(GetSubTags(subItem));
+            return result;
+        }
+
+        public List<string> GetAllTags(Tag tag, string prefix = "")
         {
             List<string> result = new List<string>();
 
-            foreach (Record record in Records)
-                foreach (string tag in record.Tags)
-                    if (!result.Contains(tag))
-                        result.Add(tag);
+            if (tag != null)
+                result.Add(prefix + tag.Name);
 
-            result.Sort();
+            List<Tag> subTags = tag != null ? Tags.FindAll(t => t.Parent == tag) : Tags.FindAll(t => t.Parent == null);
+
+            foreach (Tag subTag in subTags)
+                result.AddRange(GetAllTags(subTag, prefix + "  "));
 
             return result;
         }

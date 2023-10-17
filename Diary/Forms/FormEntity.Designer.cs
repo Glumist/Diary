@@ -1,4 +1,4 @@
-﻿namespace Diary
+﻿namespace Diary.Forms
 {
     partial class FormEntity
     {

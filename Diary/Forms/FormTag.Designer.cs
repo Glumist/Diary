@@ -1,6 +1,6 @@
 ﻿namespace Diary.Forms
 {
-    partial class FormChoice
+    partial class FormTag
     {
         /// <summary>
         /// Required designer variable.
@@ -28,78 +28,71 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.cbChoice = new System.Windows.Forms.ComboBox();
             this.btCancel = new System.Windows.Forms.Button();
             this.btOk = new System.Windows.Forms.Button();
-            this.btAdd = new System.Windows.Forms.Button();
+            this.tbItemName = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
-            // 
-            // cbChoice
-            // 
-            this.cbChoice.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbChoice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbChoice.FormattingEnabled = true;
-            this.cbChoice.Location = new System.Drawing.Point(12, 12);
-            this.cbChoice.Name = "cbChoice";
-            this.cbChoice.Size = new System.Drawing.Size(234, 21);
-            this.cbChoice.TabIndex = 1;
             // 
             // btCancel
             // 
-            this.btCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btCancel.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.btCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btCancel.Location = new System.Drawing.Point(146, 46);
+            this.btCancel.Location = new System.Drawing.Point(324, 85);
+            this.btCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btCancel.Name = "btCancel";
-            this.btCancel.Size = new System.Drawing.Size(75, 23);
-            this.btCancel.TabIndex = 9;
+            this.btCancel.Size = new System.Drawing.Size(112, 35);
+            this.btCancel.TabIndex = 7;
             this.btCancel.Text = "Отмена";
             this.btCancel.UseVisualStyleBackColor = true;
             // 
             // btOk
             // 
-            this.btOk.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btOk.Location = new System.Drawing.Point(65, 46);
+            this.btOk.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btOk.Location = new System.Drawing.Point(202, 85);
+            this.btOk.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btOk.Name = "btOk";
-            this.btOk.Size = new System.Drawing.Size(75, 23);
-            this.btOk.TabIndex = 8;
-            this.btOk.Text = "OK";
+            this.btOk.Size = new System.Drawing.Size(112, 35);
+            this.btOk.TabIndex = 6;
+            this.btOk.Text = "ОК";
             this.btOk.UseVisualStyleBackColor = true;
             this.btOk.Click += new System.EventHandler(this.btOk_Click);
             // 
-            // btAdd
+            // tbItemName
             // 
-            this.btAdd.Image = global::Diary.Properties.Resources.IconPlus;
-            this.btAdd.Location = new System.Drawing.Point(252, 10);
-            this.btAdd.Name = "btAdd";
-            this.btAdd.Size = new System.Drawing.Size(24, 23);
-            this.btAdd.TabIndex = 10;
-            this.btAdd.UseVisualStyleBackColor = true;
-            this.btAdd.Click += new System.EventHandler(this.btAdd_Click);
+            this.tbItemName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbItemName.Location = new System.Drawing.Point(18, 36);
+            this.tbItemName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbItemName.Name = "tbItemName";
+            this.tbItemName.Size = new System.Drawing.Size(601, 26);
+            this.tbItemName.TabIndex = 5;
             // 
-            // FormChoice
+            // FormTag
             // 
             this.AcceptButton = this.btOk;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btCancel;
-            this.ClientSize = new System.Drawing.Size(288, 81);
-            this.Controls.Add(this.btAdd);
+            this.ClientSize = new System.Drawing.Size(632, 140);
             this.Controls.Add(this.btCancel);
             this.Controls.Add(this.btOk);
-            this.Controls.Add(this.cbChoice);
+            this.Controls.Add(this.tbItemName);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Name = "FormChoice";
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "FormTag";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Выберите ";
+            this.Text = "Тэг";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.ComboBox cbChoice;
+
         private System.Windows.Forms.Button btCancel;
         private System.Windows.Forms.Button btOk;
-        private System.Windows.Forms.Button btAdd;
+        private System.Windows.Forms.TextBox tbItemName;
     }
 }

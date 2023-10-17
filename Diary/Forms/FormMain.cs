@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Diary
+using Diary.Classes;
+
+namespace Diary.Forms
 {
     public partial class FormMain : Form
     {
@@ -40,8 +37,6 @@ namespace Diary
 
         private void RefreshGroupTable()
         {
-            tsmiGroupAdd.Enabled = true;
-            tsmiGroupEdit.Enabled = true;
             tsmiGroupDelete.Enabled = true;
 
             switch (tscbGroup.SelectedIndex)
@@ -58,13 +53,17 @@ namespace Diary
 
         private void tsmiGroupAdd_Click(object sender, EventArgs e)
         {
-            if (tscbGroup.SelectedIndex == 1)
+            if (tscbGroup.SelectedIndex == 0)
+                AddTag();
+            else if (tscbGroup.SelectedIndex == 1)
                 AddEntity();
         }
 
         private void tsmiGroupEdit_Click(object sender, EventArgs e)
         {
-            if (tscbGroup.SelectedIndex == 1)
+            if (tscbGroup.SelectedIndex == 0)
+                EditTag();
+            else if (tscbGroup.SelectedIndex == 1)
                 EditEntity();
         }
 
@@ -83,24 +82,76 @@ namespace Diary
 
         private void RefreshTags()
         {
-            tsmiGroupAdd.Enabled = false;
-            tsmiGroupEdit.Enabled = false;
             tsmiGroupDelete.Enabled = false;
 
-            string selectedTag = GetSelectedTag();
+            tvTags.BringToFront();
 
-            List<Entity> tags = new List<Entity>();
+            Tag selectedTag = tvTags.SelectedNode != null ? tvTags.SelectedNode.Tag as Tag : null;
+
+            /*List<Entity> tags = new List<Entity>();
             tags.Add(new Entity() { Caption = TAGS_ALL });
 
             _recordsCollection.GetAllTags().ForEach(t => tags.Add(new Entity() { Caption = t }));
 
-            dgvGroups.DataSource = tags;
+            dgvGroups.DataSource = tags;*/
 
-            if (selectedTag != null)
-                SelectTag(selectedTag);
+            tvTags.Nodes.Clear();
+            TreeNode allNode = new TreeNode(TAGS_ALL) { Tag = new Tag() { Name = TAGS_ALL } };
+            tvTags.Nodes.Add(allNode);
+
+            Dictionary<Tag, TreeNode> tagNodes = new Dictionary<Tag, TreeNode>();
+            foreach (Tag tag in RecordsCollection.GetInstance().Tags)
+                tagNodes.Add(tag, GetTagNode(tag));
+            foreach (Tag tag in RecordsCollection.GetInstance().Tags.FindAll(i => i.Parent != null))
+                tagNodes[tag.Parent].Nodes.Add(tagNodes[tag]);
+            foreach (Tag tag in RecordsCollection.GetInstance().Tags.FindAll(i => i.Parent == null))
+                allNode.Nodes.Add(tagNodes[tag]);
+
+            allNode.Expand();
+
+            if (selectedTag != null && selectedTag.Name != TAGS_ALL)
+                tvTags.SelectedNode = tagNodes[selectedTag];
+            else
+                tvTags.SelectedNode = tvTags.Nodes[0];
         }
 
-        private string GetSelectedTag()
+        private TreeNode GetTagNode(Tag tag)
+        {
+            return new TreeNode(tag.Name) { Tag = tag };
+        }
+
+        private void tvTags_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            RefreshRecordsTable();
+        }
+
+        private void AddTag()
+        {
+            FormTag form = new FormTag();
+            if (form.ShowDialog() != DialogResult.OK)
+                return;
+
+            _recordsCollection.Add(form.EditedTag);
+            Save();
+            TreeNode newNode = GetTagNode(form.EditedTag);
+            tvTags.Nodes[0].Nodes.Add(newNode);
+            tvTags.SelectedNode = newNode;
+        }
+
+        private void EditTag()
+        {
+            Tag selectedTag = tvTags.SelectedNode != null ? tvTags.SelectedNode.Tag as Tag : null;
+            if (selectedTag == null || selectedTag.Name == TAGS_ALL)
+                return;
+
+            if (new FormTag(selectedTag).ShowDialog() != DialogResult.OK)
+                return;
+
+            Save();
+            tvTags.SelectedNode.Text = selectedTag.Name;
+        }
+
+        /*private string GetSelectedTag()
         {
             if (dgvGroups.SelectedRows.Count == 0 || dgvGroups.SelectedRows[0].Index == -1)
                 return null;
@@ -129,7 +180,51 @@ namespace Diary
                     break;
                 }
             }
+        }*/
+
+        #region DragDrop
+
+        private void tvTags_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            if (e.Item is TreeNode && (e.Item as TreeNode).Text != TAGS_ALL)
+                DoDragDrop(e.Item, DragDropEffects.All);
         }
+
+        private void tvTags_DragDrop(object sender, DragEventArgs e)
+        {
+            Point targetPoint = tvTags.PointToClient(new Point(e.X, e.Y));
+            TreeNode targetNode = tvTags.GetNodeAt(targetPoint);
+            TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
+
+            if (draggedNode != targetNode)
+                MoveNode(draggedNode, targetNode);
+            e.Effect = DragDropEffects.None;
+        }
+
+        private void MoveNode(TreeNode nodeToMove, TreeNode newParent)
+        {
+            nodeToMove.Remove();
+
+            if (newParent != null && newParent.Text != TAGS_ALL)
+            {
+                newParent.Nodes.Add(nodeToMove);
+                ((Tag)nodeToMove.Tag).Parent = (Tag)newParent.Tag;
+            }
+            else
+            {
+                tvTags.Nodes[0].Nodes.Add(nodeToMove);
+                ((Tag)nodeToMove.Tag).Parent = null;
+                ((Tag)nodeToMove.Tag).ParentId = -1;
+            }
+            RecordsCollection.GetInstance().Save();
+        }
+
+        private void tvTags_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.All;
+        }
+
+        #endregion
 
         private bool IsTagReal(string tag)
         {
@@ -142,6 +237,8 @@ namespace Diary
 
         private void RefreshEntities()
         {
+            dgvGroups.BringToFront();
+
             Entity selectedEntity = GetSelectedEntity();
 
             dgvGroups.DataSource = new List<Entity>(_recordsCollection.Entities);
@@ -236,25 +333,23 @@ namespace Diary
             switch (tscbGroup.SelectedIndex)
             {
                 case 0:
-                    string selectedTag = GetSelectedTag();
-                    if (selectedTag != null)
+                    Tag selectedTag = tvTags.SelectedNode != null ? tvTags.SelectedNode.Tag as Tag : null;
+                    if (selectedTag != null && selectedTag.Name != TAGS_ALL)
                     {
-                        if (selectedTag == TAGS_ALL)
-                            dgvRecords.DataSource = filteredRecords;
-                        else
-                            dgvRecords.DataSource = filteredRecords.FindAll(r => r.Tags.Contains(selectedTag));
+                        List<Tag> selectedTags = RecordsCollection.GetSubTags(selectedTag);
+                        filteredRecords = filteredRecords.FindAll(r => r.TagList.Exists(t => selectedTags.Contains(t)));
                     }
                     break;
                 case 1:
                     Entity selectedEntity = GetSelectedEntity();
                     if (selectedEntity != null)
-                        dgvRecords.DataSource = filteredRecords.FindAll(g => g.Entities.Contains(selectedEntity));
+                        filteredRecords = filteredRecords.FindAll(g => g.Entities.Contains(selectedEntity));
                     break;
                 default:
-                    dgvRecords.DataSource = filteredRecords;
                     break;
             }
 
+            dgvRecords.DataSource = filteredRecords;
             dgvRecords.ClearSelection();
         }
 
@@ -314,6 +409,7 @@ namespace Diary
                 Date = DateTime.Now,
                 Entities = new List<Entity>(selectedRecord.Entities),
                 Tags = new List<string>(selectedRecord.Tags),
+                TagList = new List<Tag>(selectedRecord.TagList),
                 Text = selectedRecord.Text
             };
 

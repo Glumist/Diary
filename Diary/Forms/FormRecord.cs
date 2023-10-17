@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Diary
+using Diary.Classes;
+
+namespace Diary.Forms
 {
     public partial class FormRecord : Form
     {
@@ -34,10 +30,20 @@ namespace Diary
             dtpDate.Value = record.Date;
 
             tbTags.Text = "";
-            record.Tags.ForEach(t => tbTags.Text += (tbTags.Text.Length > 0 ? Environment.NewLine : "") + t);
+            record.TagList.ForEach(t => tbTags.Text += (tbTags.Text.Length > 0 ? Environment.NewLine : "") + t.Name);
 
             tbText.Text = "";
             record.Text.ForEach(t => tbText.Text += (tbText.Text.Length > 0 ? Environment.NewLine : "") + t);
+
+            switch (record.Emotion)
+            {
+                case "0": rbNoEmotion.Checked = true; break;
+                case "+-": rbPlusMinus.Checked = true; break;
+                case "+": rbPlus.Checked = true; break;
+                case "++": rbDoublePlus.Checked = true; break;
+                case "-": rbMinus.Checked = true; break;
+                case "--": rbDoubleMinus.Checked = true; break;
+            }
 
             _entities = new List<Entity>(record.Entities);
             Init();
@@ -51,20 +57,49 @@ namespace Diary
 
         private void btOk_Click(object sender, EventArgs e)
         {
+            RecordsCollection recordsCollection = RecordsCollection.GetInstance();
+
             EditedRecord.Caption = tbCaption.Text;
             EditedRecord.Entities = _entities;
             EditedRecord.Date = dtpDate.Value;
 
-            List<string> tags = new List<string>();
-            foreach (String line in tbTags.Lines)
-                if (line.Trim().Length > 0)
-                    tags.Add(line.Trim());
-            EditedRecord.Tags = tags;
+            List<Tag> tags = new List<Tag>();
+            foreach (string line in tbTags.Lines)
+            {
+                string tagText = line.Trim();
+                if (tagText.Length == 0)
+                    continue;
+
+                Tag tag = recordsCollection.Tags.Find(t => t.Name == tagText);
+                if (tag == null)
+                {
+                    tag = new Tag() { Name = tagText };
+                    recordsCollection.Add(tag);
+                }
+
+                tags.Add(tag);
+            }
+            EditedRecord.TagList = tags;
 
             List<string> text = new List<string>();
             foreach (String line in tbText.Lines)
                 text.Add(line.Trim());
             EditedRecord.Text = text;
+
+            if (rbNothing.Checked)
+                EditedRecord.Emotion = "";
+            else if (rbNoEmotion.Checked)
+                EditedRecord.Emotion = "0";
+            else if (rbPlusMinus.Checked)
+                EditedRecord.Emotion = "+-";
+            else if (rbPlus.Checked)
+                EditedRecord.Emotion = "+";
+            else if (rbDoublePlus.Checked)
+                EditedRecord.Emotion = "++";
+            else if (rbMinus.Checked)
+                EditedRecord.Emotion = "-";
+            else if (rbDoubleMinus.Checked)
+                EditedRecord.Emotion = "--";
 
             DialogResult = DialogResult.OK;
             Close();

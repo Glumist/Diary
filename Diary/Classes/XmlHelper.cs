@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-namespace Diary
+namespace Diary.Classes
 {
     public static class XmlHelper
     {

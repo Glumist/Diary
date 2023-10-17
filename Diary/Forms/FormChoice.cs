@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Diary
+using Diary.Classes;
+
+namespace Diary.Forms
 {
     public partial class FormChoice : Form
     {
@@ -42,7 +37,7 @@ namespace Diary
                 foreach (Entity bundle in _recordsCollection.Entities)
                     cbChoice.Items.Add(bundle);
             else if (_selection == Selection.Tag)
-                foreach (string tag in _recordsCollection.GetAllTags())
+                foreach (string tag in _recordsCollection.GetAllTags(null))
                     cbChoice.Items.Add(tag);
         }
 
@@ -66,7 +61,7 @@ namespace Diary
             switch (_selection)
             {
                 case Selection.Entity: SelectedEntity = (Entity)cbChoice.SelectedItem; break;
-                case Selection.Tag: SelectedTag = cbChoice.Text; break;
+                case Selection.Tag: SelectedTag = cbChoice.Text.Trim(); break;
             }
 
             DialogResult = DialogResult.OK;

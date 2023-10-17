@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Entity.cs" />
+    <Compile Include="Classes\Tag.cs" />
     <Compile Include="Forms\FormChoice.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +75,12 @@
     <Compile Include="Forms\FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\FormTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormTag.Designer.cs">
+      <DependentUpon>FormTag.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\Record.cs" />
@@ -89,6 +96,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormTag.resx">
+      <DependentUpon>FormTag.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -124,6 +134,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diary.ico" />
+    <None Include="Resources\IconArrowUpDouble.png" />
+    <None Include="Resources\IconArrowUp.png" />
+    <None Include="Resources\IconArrowsCenter.png" />
+    <None Include="Resources\IconArrows.png" />
+    <None Include="Resources\IconArrowDownDouble.png" />
+    <None Include="Resources\IconArrowDown.png" />
     <None Include="Resources\IconFilter.png" />
     <None Include="Resources\IconCopy.png" />
   </ItemGroup>

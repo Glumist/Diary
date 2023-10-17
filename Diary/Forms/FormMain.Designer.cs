@@ -1,4 +1,4 @@
-﻿namespace Diary
+﻿namespace Diary.Forms
 {
     partial class FormMain
     {
@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.scMain = new System.Windows.Forms.SplitContainer();
+            this.tvTags = new System.Windows.Forms.TreeView();
             this.dgvGroups = new System.Windows.Forms.DataGridView();
             this.colGroupCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.msGroups = new System.Windows.Forms.MenuStrip();
@@ -47,6 +48,7 @@
             this.tsmiFilterIcon = new System.Windows.Forms.ToolStripMenuItem();
             this.colRecordDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colRecordCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colRecordEmotion = new System.Windows.Forms.DataGridViewImageColumn();
             this.colText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.scMain)).BeginInit();
             this.scMain.Panel1.SuspendLayout();
@@ -67,6 +69,7 @@
             // 
             // scMain.Panel1
             // 
+            this.scMain.Panel1.Controls.Add(this.tvTags);
             this.scMain.Panel1.Controls.Add(this.dgvGroups);
             this.scMain.Panel1.Controls.Add(this.msGroups);
             // 
@@ -78,6 +81,20 @@
             this.scMain.SplitterDistance = 334;
             this.scMain.SplitterWidth = 9;
             this.scMain.TabIndex = 0;
+            // 
+            // tvTags
+            // 
+            this.tvTags.AllowDrop = true;
+            this.tvTags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tvTags.HideSelection = false;
+            this.tvTags.Location = new System.Drawing.Point(0, 39);
+            this.tvTags.Name = "tvTags";
+            this.tvTags.Size = new System.Drawing.Size(334, 996);
+            this.tvTags.TabIndex = 2;
+            this.tvTags.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.tvTags_ItemDrag);
+            this.tvTags.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvTags_AfterSelect);
+            this.tvTags.DragDrop += new System.Windows.Forms.DragEventHandler(this.tvTags_DragDrop);
+            this.tvTags.DragEnter += new System.Windows.Forms.DragEventHandler(this.tvTags_DragEnter);
             // 
             // dgvGroups
             // 
@@ -170,6 +187,7 @@
             this.dgvRecords.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colRecordDate,
             this.colRecordCaption,
+            this.colRecordEmotion,
             this.colText});
             this.dgvRecords.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvRecords.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
@@ -262,6 +280,14 @@
             this.colRecordCaption.HeaderText = "Заголовок";
             this.colRecordCaption.Name = "colRecordCaption";
             // 
+            // colRecordEmotion
+            // 
+            this.colRecordEmotion.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.colRecordEmotion.DataPropertyName = "EmotionPic";
+            this.colRecordEmotion.HeaderText = "Отношение";
+            this.colRecordEmotion.Name = "colRecordEmotion";
+            this.colRecordEmotion.Width = 103;
+            // 
             // colText
             // 
             this.colText.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
@@ -315,8 +341,10 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiRecordCopy;
         private System.Windows.Forms.ToolStripTextBox tstbFilter;
         private System.Windows.Forms.ToolStripMenuItem tsmiFilterIcon;
+        private System.Windows.Forms.TreeView tvTags;
         private System.Windows.Forms.DataGridViewTextBoxColumn colRecordDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colRecordCaption;
+        private System.Windows.Forms.DataGridViewImageColumn colRecordEmotion;
         private System.Windows.Forms.DataGridViewTextBoxColumn colText;
     }
 }
